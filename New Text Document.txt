@@ -1,0 +1,9 @@
+git init
+git config --global user.email "sulayman0907@gmail.com"
+git config --global user.name "uy-alkix"
+git add .
+git commit -m "update files"
+git branch -M main
+git remote remove origin
+git remote add origin https://github.com/uy-alkix/test25.git
+git push -u origin main --force
