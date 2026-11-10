@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ug" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دەرسلىك ۋە ماقالىلەردىن PPT ياساش ئەپى</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for Uyghur and modern text -->
+    <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Almarai', sans-serif;
+        }
+        /* Custom scrollbar for clean UI */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .slide-aspect {
+            aspect-ratio: 16 / 9;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Header / Navbar -->
+    <header class="bg-gradient-to-r from-indigo-600 via-blue-600 to-violet-700 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-white/10 p-3 rounded-2xl backdrop-blur-md border border-white/20">
+                    <i class="fa-solid fa-graduation-cap text-2xl text-amber-300"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">دەرسلىك & ماقالە PPT ياساش ئەپى</h1>
+                    <p class="text-xs text-indigo-200">كىتاپلىرىڭىزنى ئاپتوماتىك ھالدا تەسىرلىك سىلايدلارغا ئايلاندۇرۇڭ</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="app.loadSampleData()" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-sm font-medium transition flex items-center gap-2 border border-white/10">
+                    <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> ئۆرنەك يۈكلەش
+                </button>
+                <button onclick="app.exportAllSlides()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-900 rounded-xl text-sm font-bold transition flex items-center gap-2 shadow-md">
+                    <i class="fa-solid fa-download"></i> ھەممىنى چۈشۈرۈش
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Left Panel: Input & Settings (5 Cols) -->
+        <section class="lg:col-span-5 bg-white rounded-3xl p-6 shadow-xl border border-slate-100 flex flex-col gap-6">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-book-open text-indigo-600"></i> ماتېرىيال كىرگۈزۈش
+                </h2>
+                <span id="status-badge" class="px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-semibold rounded-full">تەييار</span>
+            </div>
+
+            <!-- Tab Switcher -->
+            <div class="flex bg-slate-100 p-1 rounded-2xl">
+                <button onclick="app.switchTab('text')" id="tab-text-btn" class="flex-1 py-2 text-sm font-bold rounded-xl transition bg-white text-indigo-600 shadow-sm">تېكىست كىرگۈزۈش</button>
+                <button onclick="app.switchTab('file')" id="tab-file-btn" class="flex-1 py-2 text-sm font-bold rounded-xl transition text-slate-500 hover:text-slate-800">ھۆججەت يۈكلەش</button>
+            </div>
+
+            <!-- Text Input Tab -->
+            <div id="tab-text-content" class="flex flex-col gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">كىتاپ ياكى ماقالە تېمىسى</label>
+                    <input type="text" id="book-title-input" placeholder="مەسلەن: ئۇيغۇر كلاسسىك ئەدەبىياتى تارىخى" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500 text-sm transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">تېكىست مەزمۇنى (باب ۋە تېمىلار بىلەن)</label>
+                    <textarea id="book-text-input" rows="8" placeholder="بۇ يەرگە كىتاپ بابلىرى ۋە مەزمۇنلىرىنى كىرگۈزۈڭ..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500 text-sm transition resize-none"></textarea>
+                </div>
+            </div>
+
+            <!-- File Upload Tab (Hidden by default) -->
+            <div id="tab-file-content" class="hidden flex flex-col gap-4">
+                <div class="border-2 border-dashed border-slate-200 rounded-3xl p-8 text-center hover:border-indigo-500 transition cursor-pointer bg-slate-50/50" onclick="document.getElementById('file-upload').click()">
+                    <input type="file" id="file-upload" accept=".txt,.md" class="hidden" onchange="app.handleFileUpload(event)">
+                    <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl mx-auto flex items-center justify-center text-2xl mb-3 shadow-inner">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <p class="font-bold text-slate-700 mb-1">TXT ياكى Markdown ھۆججىتىنى بۇ يەرگە قويۇڭ</p>
+                    <p class="text-xs text-slate-400">باسقاندا كومپيۇتېرىڭىزدىن تاللىيالايسىز</p>
+                </div>
+                <div id="uploaded-file-name" class="text-xs text-indigo-600 font-medium text-center hidden"></div>
+            </div>
+
+            <!-- Template/Theme Picker -->
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-2">سىلايد ئۇسلۇبى ۋە رەڭگى</label>
+                <div class="grid grid-cols-4 gap-3">
+                    <button onclick="app.setTheme('indigo')" class="theme-btn border-2 border-indigo-600 bg-indigo-600 h-10 rounded-xl shadow-md transition flex items-center justify-center text-white text-xs font-bold">بىنەپشە</button>
+                    <button onclick="app.setTheme('emerald')" class="theme-btn border-2 border-transparent bg-emerald-600 h-10 rounded-xl shadow-md transition flex items-center justify-center text-white text-xs font-bold">يېشىل</button>
+                    <button onclick="app.setTheme('amber')" class="theme-btn border-2 border-transparent bg-amber-600 h-10 rounded-xl shadow-md transition flex items-center justify-center text-white text-xs font-bold">سېرىق</button>
+                    <button onclick="app.setTheme('slate')" class="theme-btn border-2 border-transparent bg-slate-800 h-10 rounded-xl shadow-md transition flex items-center justify-center text-white text-xs font-bold">قارا</button>
+                </div>
+            </div>
+
+            <!-- Generate Button -->
+            <button onclick="app.generateSlides()" class="w-full py-4 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold rounded-2xl shadow-lg hover:shadow-indigo-200 transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> سىلايدلارغا ئايلاندۇرۇش
+            </button>
+        </section>
+
+        <!-- Right Panel: Slide Preview & Editor (7 Cols) -->
+        <section class="lg:col-span-7 flex flex-col gap-6">
+            <div class="bg-white rounded-3xl p-6 shadow-xl border border-slate-100 flex flex-col h-full">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+                    <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-desktop text-indigo-600"></i> سىلايد كۆرۈنۈشى & تەھرىرلەش
+                    </h2>
+                    <div class="flex items-center gap-2" id="slide-nav-controls">
+                        <button onclick="app.prevSlide()" class="w-9 h-9 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center text-slate-700 transition">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                        <span id="slide-counter" class="text-sm font-bold text-slate-600 px-2">0 / 0</span>
+                        <button onclick="app.nextSlide()" class="w-9 h-9 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center text-slate-700 transition">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Slide Canvas Box -->
+                <div id="slide-container" class="relative w-full slide-aspect rounded-2xl shadow-2xl overflow-hidden flex flex-col justify-between p-8 text-white transition-all duration-300 bg-indigo-900">
+                    <!-- Background Glow/Pattern -->
+                    <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                    
+                    <!-- Slide Header -->
+                    <div class="relative z-10 flex justify-between items-start">
+                        <div>
+                            <span id="slide-tag" class="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold tracking-wide">باب 1</span>
+                            <h3 id="slide-title" class="text-2xl font-black mt-2 tracking-tight">تېما نامى بۇ يەرگە چىقىدۇ</h3>
+                        </div>
+                        <span id="slide-number-badge" class="text-sm font-bold opacity-60">01</span>
+                    </div>
+
+                    <!-- Slide Content Bullets -->
+                    <div class="relative z-10 my-auto">
+                        <ul id="slide-bullets" class="space-y-3">
+                            <li class="flex items-start gap-3 text-sm md:text-base font-medium">
+                                <i class="fa-solid fa-circle-check text-amber-300 mt-1.5 text-xs"></i>
+                                <span>مەزمۇن نۇقتىلىرى بۇ يەردە كۆرسىتىلىدۇ. ئۆزىڭىز خالىغانچە تەھرىرلىيەلەيسىز.</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Slide Footer -->
+                    <div class="relative z-10 flex justify-between items-center text-xs opacity-75 pt-4 border-t border-white/10">
+                        <span id="slide-footer-title">دەرسلىك سىستېمىسى</span>
+                        <span>ئۇيغۇرچە PPT ئايلاندۇرغۇچ</span>
+                    </div>
+                </div>
+
+                <!-- Slide Editor Controls -->
+                <div class="mt-6 flex flex-col gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-600">بۇ سىلايدنى تەھرىرلەش:</span>
+                        <div class="flex gap-2">
+                            <button onclick="app.addBullet()" class="px-3 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg text-xs font-bold transition">
+                                <i class="fa-solid fa-plus"></i> نۇقتا قوشۇش
+                            </button>
+                            <button onclick="app.deleteCurrentSlide()" class="px-3 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">
+                                <i class="fa-solid fa-trash"></i> سىلايدنى ئۆچۈرۈش
+                            </button>
+                        </div>
+                    </div>
+                    <input type="text" id="edit-slide-title" oninput="app.updateCurrentTitle(this.value)" placeholder="سىلايد تېمىسىنى ئۆزگەرتىش..." class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <!-- Thumbnails Bar -->
+                <div class="mt-6">
+                    <p class="text-xs font-bold text-slate-500 mb-3">بارلىق سىلايدلار تىزىملىكى:</p>
+                    <div id="thumbnails-list" class="flex gap-3 overflow-x-auto pb-2">
+                        <!-- Thumbnails injected dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto py-6 text-center text-xs text-slate-400 border-t border-slate-100">
+        <p>بارلىق ھوقۇققا ئىگە • زامانىۋى ئۇيغۇرچە مائارىپ قورالى</p>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let app;
+
+        class BookToPPTApp {
+            constructor() {
+                this.slides = [];
+                this.currentSlideIndex = 0;
+                this.currentTheme = 'indigo';
+                this.themes = {
+                    indigo: 'bg-gradient-to-br from-indigo-900 via-blue-900 to-slate-900',
+                    emerald: 'bg-gradient-to-br from-emerald-900 via-teal-900 to-slate-900',
+                    amber: 'bg-gradient-to-br from-amber-900 via-orange-900 to-slate-900',
+                    slate: 'bg-gradient-to-br from-slate-900 via-zinc-900 to-stone-900'
+                };
+                
+                // Load sample data on start
+                this.loadSampleData(true);
+            }
+
+            switchTab(tab) {
+                const textBtn = document.getElementById('tab-text-btn');
+                const fileBtn = document.getElementById('tab-file-btn');
+                const textContent = document.getElementById('tab-text-content');
+                const fileContent = document.getElementById('tab-file-content');
+
+                if (tab === 'text') {
+                    textBtn.className = "flex-1 py-2 text-sm font-bold rounded-xl transition bg-white text-indigo-600 shadow-sm";
+                    fileBtn.className = "flex-1 py-2 text-sm font-bold rounded-xl transition text-slate-500 hover:text-slate-800";
+                    textContent.classList.remove('hidden');
+                    fileContent.classList.add('hidden');
+                } else {
+                    fileBtn.className = "flex-1 py-2 text-sm font-bold rounded-xl transition bg-white text-indigo-600 shadow-sm";
+                    textBtn.className = "flex-1 py-2 text-sm font-bold rounded-xl transition text-slate-500 hover:text-slate-800";
+                    fileContent.classList.remove('hidden');
+                    textContent.classList.add('hidden');
+                }
+            }
+
+            setTheme(themeName) {
+                this.currentTheme = themeName;
+                document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('border-white', 'scale-105'));
+                event.target.classList.add('border-white', 'scale-105');
+                
+                const container = document.getElementById('slide-container');
+                container.className = `relative w-full slide-aspect rounded-2xl shadow-2xl overflow-hidden flex flex-col justify-between p-8 text-white transition-all duration-300 ${this.themes[themeName]}`;
+            }
+
+            loadSampleData(initial = false) {
+                document.getElementById('book-title-input').value = "ئۇيغۇر كلاسسىك ئەدەبىياتى ۋە تارىخى";
+                document.getElementById('book-text-input').value = 
+`1-باب: كிறاسس كۇرسى ۋە تونۇشتۇرۇش
+- دەرسلىكنىڭ ئاساسلىق مەقسىتى ۋە ئەھمىيىتى
+- تارىخىي ئارقا كۆرۈنۈش ۋە ئاساسىي ئۇقۇملار
+- ئوقۇتۇش جەريانىدىكى مۇھىم نۇقتىلار
+
+2-باب: مەشھۇر شائىرلار ۋە ئەسەرلەر
+- مەھمۇد كەشغەرى ۋە تۈركىي تىللار ديۇانى
+- يۈسۈپ خاس ھاجىپ ۋە قۇتادغۇ بىلىگ
+- ئەھمەد يۈگنەكى ۋە ھەيقىلۇل ھەقىقەت
+
+3-باب: خۇلاسە ۋە تەۋسىيەلەر
+- كلاسسىك ئەدەبىياتنى بۈگۈنكى كۈندە ئۆگىنىش
+- كەلگۈسىدىكى تەتقىقات يۆنىلىشلىرى`;
+
+                if (!initial) {
+                    this.generateSlides();
+                } else {
+                    this.generateSlides();
+                }
+            }
+
+            handleFileUpload(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                document.getElementById('uploaded-file-name').innerText = `تاللانغان ھۆججەت: ${file.name}`;
+                document.getElementById('uploaded-file-name').classList.remove('hidden');
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('book-text-input').value = e.target.result;
+                    document.getElementById('book-title-input').value = file.name.replace(/\.[^/.]+$/, "");
+                    this.switchTab('text');
+                    this.generateSlides();
+                };
+                reader.readAsText(file);
+            }
+
+            generateSlides() {
+                const title = document.getElementById('book-title-input').value.trim() || "دەرسلىك تېمىسى";
+                const text = document.getElementById('book-text-input').value.trim();
+
+                if (!text) {
+                    alert("تېكىست مەزمۇنى بوش بولماسلىقى كېرەك!");
+                    return;
+                }
+
+                this.slides = [];
+
+                // Title Slide
+                this.slides.push({
+                    tag: "مۇقاۋا بەت",
+                    title: title,
+                    bullets: ["مائارىپ دەرسلىك ۋە ماتېرىيال سىستېمىسى", "ئاپتوماتىك تەييارلاندى"],
+                    footer: title
+                });
+
+                // Parse text by chapters
+                const lines = text.split('\n');
+                let currentChapter = "ئاساسىي مەزمۇن";
+                let currentBullets = [];
+
+                for (let line of lines) {
+                    line = line.trim();
+                    if (!line) continue;
+
+                    if (line.includes("باب") || line.includes("بۆلۈم") || line.endsWith(":") || line.startsWith("#")) {
+                        if (currentBullets.length > 0) {
+                            this.slides.push({
+                                tag: "باب مەزمۇنى",
+                                title: currentChapter,
+                                bullets: currentBullets,
+                                footer: title
+                            });
+                            currentBullets = [];
+                        }
+                        currentChapter = line.replace(/^#+\s*/, '');
+                    } else if (line.startsWith("-") || line.startsWith("•") || line.startsWith("*")) {
+                        currentBullets.push(line.replace(/^[-•*]\s*/, ''));
+                    } else {
+                        currentBullets.push(line);
+                    }
+                }
+
+                if (currentBullets.length > 0) {
+                    this.slides.push({
+                        tag: "تەپسىلات",
+                        title: currentChapter,
+                        bullets: currentBullets,
+                        footer: title
+                    });
+                }
+
+                // Summary Slide
+                this.slides.push({
+                    tag: "خۇلاسە",
+                    title: "خۇلاسە ۋە ئاخىرقى سۆز",
+                    bullets: ["بارلىق تېمىلار ئاخىرلاشتى", "سوئاللار ۋە مۇنازىرە ۋاقتى"],
+                    footer: title
+                });
+
+                this.currentSlideIndex = 0;
+                this.renderSlide();
+                this.renderThumbnails();
+            }
+
+            renderSlide() {
+                if (this.slides.length === 0) return;
+                const slide = this.slides[this.currentSlideIndex];
+
+                document.getElementById('slide-tag').innerText = slide.tag;
+                document.getElementById('slide-title').innerText = slide.title;
+                const numberBadge = document.getElementById('slide-number-badge');
+                if (numberBadge) {
+                    numberBadge.innerText = String(this.currentSlideIndex + 1).padStart(2, '0');
+                }
+                document.getElementById('slide-footer-title').innerText = slide.footer;
+                document.getElementById('edit-slide-title').value = slide.title;
+                document.getElementById('slide-counter').innerText = `${this.currentSlideIndex + 1} / ${this.slides.length}`;
+
+                const bulletsUl = document.getElementById('slide-bullets');
+                bulletsUl.innerHTML = '';
+                slide.bullets.forEach((bullet, index) => {
+                    const li = document.createElement('li');
+                    li.className = "flex items-start gap-3 text-sm md:text-base font-medium group cursor-pointer";
+                    li.innerHTML = `
+                        <i class="fa-solid fa-circle-check text-amber-300 mt-1.5 text-xs"></i>
+                        <span contenteditable="true" onblur="app.updateBullet(${index}, this.innerText)" class="focus:bg-white/10 focus:px-2 rounded transition outline-none w-full">${bullet}</span>
+                    `;
+                    bulletsUl.appendChild(li);
+                });
+            }
+
+            renderThumbnails() {
+                const container = document.getElementById('thumbnails-list');
+                container.innerHTML = '';
+
+                this.slides.forEach((slide, index) => {
+                    const thumb = document.createElement('div');
+                    thumb.className = `flex-shrink-0 w-32 h-18 rounded-xl p-3 cursor-pointer border-2 transition flex flex-col justify-between text-white text-[10px] ${index === this.currentSlideIndex ? 'border-indigo-600 shadow-md scale-105 ' + this.themes[this.currentTheme] : 'border-slate-200 bg-slate-800 opacity-70'}`;
+                    thumb.onclick = () => {
+                        this.currentSlideIndex = index;
+                        this.renderSlide();
+                        this.renderThumbnails();
+                    };
+                    thumb.innerHTML = `
+                        <span class="font-bold truncate">${slide.title}</span>
+                        <span class="opacity-60">سىلايد ${index + 1}</span>
+                    `;
+                    container.appendChild(thumb);
+                });
+            }
+
+            nextSlide() {
+                if (this.currentSlideIndex < this.slides.length - 1) {
+                    this.currentSlideIndex++;
+                    this.renderSlide();
+                    this.renderThumbnails();
+                }
+            }
+
+            prevSlide() {
+                if (this.currentSlideIndex > 0) {
+                    this.currentSlideIndex--;
+                    this.renderSlide();
+                    this.renderThumbnails();
+                }
+            }
+
+            updateCurrentTitle(newTitle) {
+                if (this.slides[this.currentSlideIndex]) {
+                    this.slides[this.currentSlideIndex].title = newTitle;
+                    this.renderThumbnails();
+                }
+            }
+
+            updateBullet(bulletIndex, text) {
+                if (this.slides[this.currentSlideIndex]) {
+                    this.slides[this.currentSlideIndex].bullets[bulletIndex] = text;
+                }
+            }
+
+            addBullet() {
+                if (this.slides[this.currentSlideIndex]) {
+                    this.slides[this.currentSlideIndex].bullets.push("يېڭى مەزمۇن نۇقتىسى...");
+                    this.renderSlide();
+                }
+            }
+
+            deleteCurrentSlide() {
+                if (this.slides.length <= 1) {
+                    alert("ئەڭ ئاز بولغاندا بىر سىلايد قېلىشى كېرەك!");
+                    return;
+                }
+                this.slides.splice(this.currentSlideIndex, 1);
+                if (this.currentSlideIndex >= this.slides.length) {
+                    this.currentSlideIndex = this.slides.length - 1;
+                }
+                this.renderSlide();
+                this.renderThumbnails();
+            }
+
+            exportAllSlides() {
+                // Generates a clean text/JSON export simulating PPT download or presentation package
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.slides, null, 2));
+                const downloadAnchor = document.createElement('a');
+                downloadAnchor.setAttribute("href", dataStr);
+                downloadAnchor.setAttribute("download", "ders_presentation_paketi.json");
+                document.body.appendChild(downloadAnchor);
+                downloadAnchor.click();
+                downloadAnchor.remove();
+                
+                alert("سىلايدلىرىڭىز مۇۋەپپەقىيەتلىك چۈشۈرۈلدى! سىز بۇنى باشقا تەقدىمات پروگراممىلىرىغا ئىمپورت قىلالايسىز.");
+            }
+        }
+
+        // Initialize App securely on window load
+        window.addEventListener('DOMContentLoaded', () => {
+            app = new BookToPPTApp();
+        });
+    </script>
+</body>
+</html>
